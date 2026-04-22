@@ -3,13 +3,9 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import appCss from "../styles.css?url";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { Chatbot } from "@/components/site/Chatbot";
-import { BackToTop } from "@/components/site/BackToTop";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
-import { SplashScreen } from "@/components/site/SplashScreen";
-import { RouteLoader } from "@/components/site/RouteLoader";
 
 function NotFoundComponent() {
   return (
@@ -39,7 +35,11 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "DM + Tech Services — Your Revenue Growth Partner in the AI Era" },
-      { name: "description", content: "Premium web development, SEO, social media marketing, branding, and AI-driven solutions to help businesses grow faster." },
+      {
+        name: "description",
+        content:
+          "Premium web development, SEO, social media marketing, branding, and AI-driven solutions to help businesses grow faster.",
+      },
       { name: "author", content: "DM + Tech Services" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -70,15 +70,11 @@ function RootComponent() {
     <ThemeProvider>
       <AuthProvider>
         <div className="flex min-h-screen flex-col bg-background bg-[radial-gradient(circle_at_top,oklch(0.7_0.2_290_/_0.05),transparent_34%),radial-gradient(circle_at_bottom_right,oklch(0.72_0.14_185_/_0.05),transparent_26%)]">
-          <SplashScreen />
-          <RouteLoader />
           <Navbar />
           <main className="flex-1">
             <Outlet />
           </main>
           <Footer />
-          <Chatbot />
-          <BackToTop />
           <Toaster position="bottom-left" />
         </div>
       </AuthProvider>

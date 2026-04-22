@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { dbClient } from "@/integrations/mongodb/client";
-import { services as staticServices, SERVICE_SLUGS } from "@/components/site/services-data";
+import { services as staticServices } from "@/components/site/services-data";
 
 type Service = {
   id: string;
@@ -20,7 +20,11 @@ export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
       { title: "Services — DM + Tech Services" },
-      { name: "description", content: "Web development, SEO, social media marketing, branding, AI solutions, and growth analytics — a complete growth stack under one roof." },
+      {
+        name: "description",
+        content:
+          "Web development, SEO, social media marketing, branding, AI solutions, and growth analytics — a complete growth stack under one roof.",
+      },
       { property: "og:title", content: "Services — DM + Tech Services" },
       { property: "og:description", content: "Six service lines, one senior team. Discover what we build." },
     ],
@@ -45,6 +49,20 @@ function ServicesPage() {
       });
   }, []);
 
+  const displayServices =
+    services.length > 0
+      ? services
+      : staticServices.map((s, index) => ({
+          id: `static-${index}`,
+          title: s.title,
+          slug: s.slug,
+          description: s.blurb,
+          category: "Service",
+          price: null,
+          image_url: null,
+          featured: true,
+        }));
+
   return (
     <>
       <section className="bg-gradient-hero-dark text-white relative overflow-hidden">
@@ -65,33 +83,44 @@ function ServicesPage() {
       <section className="container mx-auto px-4 md:px-6 py-20 md:py-24">
         {loading ? (
           <div className="text-center text-muted-foreground py-20">Loading services…</div>
-        ) : services.length === 0 ? (
-          <div className="text-center text-muted-foreground py-20">No services published yet.</div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((s, i) => (
+            {displayServices.map((s, i) => (
               <article
                 key={s.id}
-                className="bg-card border border-border rounded-2xl p-6 shadow-md hover:shadow-elegant hover:border-primary/40 hover:-translate-y-1 transition-smooth animate-fade-up"
+                className="bg-card border border-border rounded-2xl p-6 shadow-md hover:shadow-elegant hover:border-primary/40 hover:-translate-y-1 transition-smooth animate-fade-up flex flex-col"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
                 <div className="w-12 h-12 rounded-xl bg-gradient-primary text-primary-foreground flex items-center justify-center shadow-glow mb-4">
                   <Sparkles size={20} />
                 </div>
+
                 {s.category && (
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">{s.category}</div>
                 )}
+
                 <h2 className="font-display text-xl font-extrabold mb-2">{s.title}</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-4">{s.description}</p>
-                <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
+
+                <div className="flex items-center justify-between border-t border-border pt-4 mt-auto">
                   {s.price != null ? (
                     <div>
                       <div className="text-xs text-muted-foreground">Starting at</div>
-                      <div className="font-display font-extrabold text-foreground text-lg">${Number(s.price).toLocaleString()}</div>
+                      <div className="font-display font-extrabold text-foreground text-lg">
+                        ${Number(s.price).toLocaleString()}
+                      </div>
                     </div>
-                  ) : <span />}
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Custom scope</span>
+                  )}
                   <CheckCircle2 size={18} className="text-accent" />
                 </div>
+
+                <Button variant="ghost" className="mt-3 justify-start px-0" asChild>
+                  <Link to="/services/$slug" params={{ slug: s.slug }}>
+                    Learn more <ArrowRight size={16} />
+                  </Link>
+                </Button>
               </article>
             ))}
           </div>
@@ -99,9 +128,13 @@ function ServicesPage() {
 
         <div className="mt-20 text-center">
           <h3 className="font-display text-2xl md:text-3xl font-extrabold mb-4">Not sure where to start?</h3>
-          <p className="text-muted-foreground mb-6">Book a free 30-minute strategy call and we'll point you in the right direction.</p>
+          <p className="text-muted-foreground mb-6">
+            Book a free 30-minute strategy call and we'll point you in the right direction.
+          </p>
           <Button variant="hero" size="lg" asChild>
-            <Link to="/contact">Talk to our team <ArrowRight size={16} /></Link>
+            <Link to="/contact">
+              Talk to our team <ArrowRight size={16} />
+            </Link>
           </Button>
         </div>
       </section>
