@@ -11,7 +11,7 @@ const app = express();
 const PORT = Number(process.env.PORT || 4000);
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/dmtech';
 const JWT_SECRET = process.env.JWT_SECRET || 'dmtech-dev-secret';
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:8081';
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || '';
 const CLIENT_ORIGINS = (process.env.CLIENT_ORIGINS || [
   CLIENT_ORIGIN,
   'http://localhost:3000',
@@ -20,13 +20,22 @@ const CLIENT_ORIGINS = (process.env.CLIENT_ORIGINS || [
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:8081',
-].join(',')).split(',').map((v) => v.trim()).filter(Boolean);
+].join(','))
+  .split(',')
+  .map((v) => v.trim())
+  .filter(Boolean);
 
 app.use(cors({
   origin(origin, callback) {
     if (!origin) return callback(null, true);
+
     const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
-    if (isLocalhost || CLIENT_ORIGINS.includes(origin)) return callback(null, true);
+    const isVercelDomain = /^https:\/\/.*\.vercel\.app$/.test(origin);
+
+    if (isLocalhost || isVercelDomain || CLIENT_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
