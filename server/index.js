@@ -9,7 +9,7 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/dmtech';
+const MONGODB_URI = process.env.MONGODB_URI;
 const JWT_SECRET = process.env.JWT_SECRET || 'dmtech-dev-secret';
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || '';
 const CLIENT_ORIGINS = (process.env.CLIENT_ORIGINS || [
@@ -410,14 +410,19 @@ async function seed() {
   }
 }
 
+if (!MONGODB_URI) {
+  console.error("MONGODB_URI is missing");
+  process.exit(1);
+}
 mongoose.connect(MONGODB_URI)
   .then(async () => {
+    console.log("MongoDB connected");
     await seed();
-    app.listen(PORT, () => {
-      console.log(`Mongo API running on http://localhost:${PORT}`);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Mongo API running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.error('MongoDB connection failed:', error);
+    console.error("MongoDB connection failed:", error.message);
     process.exit(1);
   });
