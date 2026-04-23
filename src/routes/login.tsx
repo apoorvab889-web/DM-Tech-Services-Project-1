@@ -4,7 +4,6 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { dbClient } from "@/integrations/mongodb/client";
 import { useAuth } from "@/lib/auth-context";
@@ -35,24 +34,27 @@ function LoginPage() {
     if (!loading && user) navigate({ to: "/dashboard" });
   }, [user, loading, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const parsed = schema.safeParse({ email, password });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
-    setBusy(true);
-    const { error } = await dbClient.auth.signInWithPassword(parsed.data);
-    setBusy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Welcome back!");
-    navigate({ to: "/dashboard" });
-  };
 
+    try {
+      setBusy(true);
+      const { error } = await dbClient.auth.signInWithPassword(parsed.data);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success("Welcome back!");
+      navigate({ to: "/dashboard" });
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-gradient-soft">
@@ -68,24 +70,43 @@ function LoginPage() {
             </div>
           </div>
 
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                required
+                className="w-full h-12 rounded-xl border border-input bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
+
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                required
+                className="w-full h-12 rounded-xl border border-input bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
+
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={busy}>
-              {busy ? "Signing in…" : "Sign in"}
+              {busy ? "Signing in..." : "Sign in"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link to="/register" className="text-primary font-semibold hover:underline">Create one</Link>
+            <Link to="/register" className="text-primary font-semibold hover:underline">
+              Create one
+            </Link>
           </p>
         </div>
       </div>
