@@ -34,27 +34,42 @@ function LoginPage() {
     if (!loading && user) navigate({ to: "/dashboard" });
   }, [user, loading, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const parsed = schema.safeParse({ email, password });
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
+
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  console.log("submit clicked");
+
+  const parsed = schema.safeParse({ email, password });
+  if (!parsed.success) {
+    console.log("validation failed", parsed.error.issues);
+    toast.error(parsed.error.issues[0].message);
+    return;
+  }
+
+  try {
+    setBusy(true);
+    console.log("before sign in", parsed.data);
+
+    const { error } = await dbClient.auth.signInWithPassword(parsed.data);
+
+    console.log("after sign in", error);
+
+    if (error) {
+      toast.error(error.message);
       return;
     }
 
-    try {
-      setBusy(true);
-      const { error } = await dbClient.auth.signInWithPassword(parsed.data);
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-      toast.success("Welcome back!");
-      navigate({ to: "/dashboard" });
-    } finally {
-      setBusy(false);
-    }
-  };
+    toast.success("Welcome back!");
+    navigate({ to: "/dashboard" });
+  } catch (err) {
+    console.error("login crash", err);
+    toast.error(err instanceof Error ? err.message : "Login failed");
+  } finally {
+    setBusy(false);
+    console.log("finally done");
+  }
+};
+
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-gradient-soft">
